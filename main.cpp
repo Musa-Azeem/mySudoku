@@ -1,13 +1,14 @@
 /*
 Musa Azeem
 Completed: 10/17/21 - 18:33:01
-This program is used to test the mySudoku object
-Inputs: Command line inputs include a file containing values representing a sudoku board. 
-    Data must be formatted in 9 rows of 9 integer values, with each value seperated by a space
+This program is used to run the mySudoku project
+
+Inputs: Command line input - filename of a sudoku board file
+
 Outputs: Outputs to stdout whether or not the board has been solved, and the result board after solving. 
 */
+
 #include <iostream>
-#include <fstream>
 #include <string>
 #include "inc/mySudoku.h"
 
@@ -19,14 +20,18 @@ int main(int argc, char **argv){
         cout << argv[0] << " <InputFileName>" << endl;
         exit(0);
     }
-    mySudoku game;
+    mySudoku game;              // create mySudoku object to solve the puzzle
 
-    game.readData(argv[1]);
+    game.readData(argv[1]);     // read board
+
+    // solve puzzle
     if(game.solvePuzzle()){
+        // if object has solved the puzzle, print the board to stdout
         cout << "Solved Puzzle: " << endl;
         game.printData();
     }
     else{
+        // If object was unable to solve the puzzle, report to user
         cout << "Puzzle could not be solved" << endl;
     	game.printData();
     }
