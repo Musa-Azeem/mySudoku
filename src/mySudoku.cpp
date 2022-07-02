@@ -29,8 +29,6 @@ Outputs: printData() prints the board array to stdout.
 #include <fstream>
 #include <string>
 
-using namespace std;
-
 mySudoku::mySudoku(){
     /*
     defualt constructor, calls initBoard() to initialize board attribute - initially sets all values to zero
@@ -47,8 +45,8 @@ mySudoku::mySudoku(int inputBoard[][9]){
     Output: None - directly modifies class board array
     */
     init();
-    for(int i(0); i<size;i++){
-        for(int j(0); j<size; j++){
+    for(int i(0); i<SIZE; i++){
+        for(int j(0); j<SIZE; j++){
             board[i][j] = inputBoard[i][j];
         }
     }
@@ -59,34 +57,34 @@ void mySudoku::init(){
     Inputs: None
     Output: None - directly modifies class board array
     */
-    size = 9;
-    for(int i=0; i<size;i++){
+    // size = 9;
+    for(int i=0; i<SIZE;i++){
         //nums[i] = i+1;                  //init nums array
-        for(int j(0); j<size; j++){
+        for(int j(0); j<SIZE; j++){
             board[i][j] = 0;            //init board array
             numPos[i][j] = 0;          //init number of possibilities array
-            for(int k(0); k<size; k++){
+            for(int k(0); k<SIZE; k++){
                 pos[i][j][k] = 0;       //init posibilities array
             }
         }
     }
     
 }
-void mySudoku::readData(const string fileName){
+void mySudoku::readData(const std::string fileName){
     /*
     takes in a file name and reads it, using the values to creates a sudoku board
     Input:  A formatted file containing data defining a sudoku board
     Output: None - directly modifies class board array
     */
-    ifstream in_file;
+    std::ifstream in_file;
     in_file.open(fileName);
     if(in_file.fail()){
-        cout << "Error opening the file" << endl;
+        std::cout << "Error opening the file" << std::endl;
         exit(1);
     }
     while(!in_file.eof()){
-        for(int i(0); i<size; i++){
-            for(int j(0); j<size; j++){
+        for(int i(0); i<SIZE; i++){
+            for(int j(0); j<SIZE; j++){
                 in_file >> board[i][j];
             }
         }
@@ -100,11 +98,11 @@ void mySudoku::printData(){
     Input:  None
     Output: prints the class board array to stdout - does not modify class variables
     */
-    for(int i(0); i<size; i++){
-        for(int j(0); j<size; j++){
-            cout << board[i][j] << " ";
+    for(int i(0); i<SIZE; i++){
+        for(int j(0); j<SIZE; j++){
+            std::cout << board[i][j] << " ";
         }
-        cout << endl;
+        std::cout << std::endl;
     }
 }
 
@@ -117,12 +115,12 @@ bool mySudoku::solvePuzzle(){
     Input:  None
     Output: function directly modifies class board array, and returns the return of solvePuzzleRec, which is 1 if the puzzle is solved, and 0 if not
     */
-    for(int i(0); i<size; i++){
-        for(int j(0); j<size; j++){
+    for(int i(0); i<SIZE; i++){
+        for(int j(0); j<SIZE; j++){
             int index(0);           //index for posibilities arrays
             if(board[i][j] == 0){   //check if spot is empty
 
-                for(int k(1); k<size+1; k++){   //iterate through each possible number 1-9
+                for(int k(1); k<SIZE+1; k++){   //iterate through each possible number 1-9
                     if(!checkRow(i, k) && !checkColumn(j, k) && !checkSubSquare(i,j,k)){    //check if each number is a possibility
                         pos[i][j][index] = k;   //add possibilies to the pos array
                         index++;                //update index for possibility array at this spot
@@ -162,7 +160,7 @@ bool mySudoku::solvePuzzleRec(int startI, int startJ){
     */
 
     bool found(0); //keeps track of whether or not a number that fits has been found for each spot
-    for(int i(startI); i<size; i++){    //start on row of last branch
+    for(int i(startI); i<SIZE; i++){    //start on row of last branch
         int j;
         if(i==startI){      //if this is the first iteration of the function call, start on column after the last branch spot
             j=startJ;
@@ -170,12 +168,12 @@ bool mySudoku::solvePuzzleRec(int startI, int startJ){
         else{
             j=0;
         }
-        for(int j(0); j<size; j++){    //start on column of last branch
+        for(int j(0); j<SIZE; j++){    //start on column of last branch
             //if this is the first iteration of the function call , start on column after the last branch spot
             //otherwise, start at first column of new row (as usual)
             if(i==startI && j==0){
                 j=startJ;
-                if(j>=size){    //if this value of j is outside of range, go to next row
+                if(j>=SIZE){    //if this value of j is outside of range, go to next row
                     continue;
                 }
             }
@@ -208,7 +206,7 @@ bool mySudoku::checkRow(const int row, const int number){
     Input:  integer value for row on board to search, and integer value to search for
     Output: returns 1 if the value is found, and 0 if not
     */
-    for(int j=0; j<size; j++){
+    for(int j=0; j<SIZE; j++){
         if(number==board[row][j]){
             return(1); //return true - number was found
         }
@@ -222,7 +220,7 @@ bool mySudoku::checkColumn(const int column, const int number){
     Input: integer value for column on board to search, and integer value to search for
     Output: returns 1 if the value is found, and 0 if not
     */
-    for(int i(0); i<size; i++){
+    for(int i(0); i<SIZE; i++){
         if(number==board[i][column]){
             return(1);  //return true if number is found
         }

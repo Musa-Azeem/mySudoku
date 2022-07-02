@@ -12,12 +12,10 @@ Outputs: Outputs to stdout whether or not the board has been solved, and the res
 #include <string>
 #include "inc/mySudoku.h"
 
-using namespace std;
-
 int main(int argc, char **argv){
     if(argc != 2){
-        cout << "Usage for " << argv[0] << ":" << endl;
-        cout << argv[0] << " <InputFileName>" << endl;
+        std::cout << "Usage for " << argv[0] << ":" << std::endl;
+        std::cout << argv[0] << " <InputFileName>" << std::endl;
         exit(0);
     }
     mySudoku game;              // create mySudoku object to solve the puzzle
@@ -27,12 +25,12 @@ int main(int argc, char **argv){
     // solve puzzle
     if(game.solvePuzzle()){
         // if object has solved the puzzle, print the board to stdout
-        cout << "Solved Puzzle: " << endl;
+        std::cout << "Solved Puzzle: " << std::endl;
         game.printData();
     }
     else{
         // If object was unable to solve the puzzle, report to user
-        cout << "Puzzle could not be solved" << endl;
+        std::cout << "Puzzle could not be solved" << std::endl;
     	game.printData();
     }
 }
