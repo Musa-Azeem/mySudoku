@@ -45,6 +45,7 @@ Unix operating system with C++ 17
 - Input file must be formatted in 9 rows of 9 integer values, with each value 
 separated by a blank space
 - Empty spots are represented by a 0
+- Example input files are provided in the `res` directory
 
 
 ## Project Components
