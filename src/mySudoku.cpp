@@ -1,24 +1,20 @@
 /*
 Musa Azeem
 Completed: 10/17/21 - 18:33:01
-This program definess a sudoku object that holds a sudoku board and is capable of solving it and printing its contents to stdout
-    class variables:
-        board:  9x9 2d integer array - represents the sudoku board
-        pos:    9x9x9 3d integer array - holds all possible values at each empty spot of the sudoku board
-        numPos: 9x9 2d integer array - holds the number of possibilities found for each spot on board
-        size:   constant value 9 - used for initializing arrays and as limit for valid numbers (0-8)
-    functions:
-	    default constructor:    initializes the board array. All values are set to 0
-        alternate constructor:  initializes the board array using a input 9x9 2d array representing a sudoku board
-        destructor:             empty
-        init:                   called by constructors - initializes all arrays with 0s
-        readData:               reads a input file with 9 rows of 9 values, representing a sudoku board. The method uses the data to populate the board array
-        printData:              prints the board array to stdout
-        solvePuzzle:            solves the sudoku puzzle held in the board array - calls solvePuzzleRec to completely solve
-        solvePuzzleRec:         recursive function to finish solving the puzzle
-        checkColumn:            checks a column in the board for a value
-        checkRow:               checks a row in the board for a value
-        checkSubSquare:         checks a subsquare in the board for a value
+This program defines the functions of the mySudoku class
+
+Functions:
+    default constructor:    initializes the board array. All values are set to 0
+    alternate constructor:  initializes the board array using a input 9x9 2d array representing a sudoku board
+    destructor:             empty
+    init:                   called by constructors - initializes all arrays with 0s
+    readData:               reads a input board file with 9 rows of 9 values
+    printData:              prints the board array to stdout
+    solvePuzzle:            solves the sudoku puzzle held in the board array - calls solvePuzzleRec
+    solvePuzzleRec:         recursive function to finish solving the puzzle
+    checkColumn:            checks a column in the board for a value
+    checkRow:               checks a row in the board for a value
+    checkSubSquare:         checks a subsquare in the board for a value
 
 Inputs: No inputs required for default constructor. Board may be initialized with a 9x9 array or a input file.
     The input file must be formatted in 9 rows of 9 integer values, with each value seperated by a space.
@@ -37,6 +33,7 @@ mySudoku::mySudoku(){
     */
     init();
 }
+
 mySudoku::mySudoku(int inputBoard[][9]){
     /*
     alternate constuctor - calls initBoard() to initialize board attribute
@@ -50,20 +47,20 @@ mySudoku::mySudoku(int inputBoard[][9]){
             board[i][j] = inputBoard[i][j];
         }
     }
+    ready = true;
 }
+
 void mySudoku::init(){
     /*
     initializes class variables
     Inputs: None
     Output: None - directly modifies class board array
     */
-    // size = 9;
     for(int i=0; i<SIZE;i++){
-        //nums[i] = i+1;                  //init nums array
-        for(int j(0); j<SIZE; j++){
+        for(int j=0; j<SIZE; j++){
             board[i][j] = 0;            //init board array
             numPos[i][j] = 0;          //init number of possibilities array
-            for(int k(0); k<SIZE; k++){
+            for(int k=0; k<SIZE; k++){
                 pos[i][j][k] = 0;       //init posibilities array
             }
         }
@@ -90,6 +87,7 @@ void mySudoku::readData(const std::string fileName){
         }
     }
     in_file.close();
+    ready = true;
 }
 
 void mySudoku::printData(){
@@ -115,6 +113,10 @@ bool mySudoku::solvePuzzle(){
     Input:  None
     Output: function directly modifies class board array, and returns the return of solvePuzzleRec, which is 1 if the puzzle is solved, and 0 if not
     */
+   if(!ready){
+       std::cout << "Board not loaded into object yet" << std::endl;
+       return false;
+   }
     for(int i(0); i<SIZE; i++){
         for(int j(0); j<SIZE; j++){
             int index(0);           //index for posibilities arrays
@@ -129,7 +131,7 @@ bool mySudoku::solvePuzzle(){
                     }
                 }
 
-                //enter unique solutions into board
+                // enter unique solutions into board
                 if(numPos[i][j]==1){
                     //if there is only one possibility at this spot, set it in the board
                     //since this is the only possible number at this spot, it is entered into the board and
