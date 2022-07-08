@@ -15,6 +15,7 @@ mySudoku class:
         board (int[][]):    9x9 2D array to represent the sudoku board
         pos (int[][][]):    9x9x9 3D array to hold possble values at each position of the board
         numPos (int[][]):   9x9 2D array to hold the number of possiblities at each position of the board
+        ready (bool):       Indicated whether or not a board has been loaded into the class yet or not
 
     Class functions:
         Public:

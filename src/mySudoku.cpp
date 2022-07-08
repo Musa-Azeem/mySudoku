@@ -15,11 +15,8 @@ Functions:
     checkColumn:            checks a column in the board for a value
     checkRow:               checks a row in the board for a value
     checkSubSquare:         checks a subsquare in the board for a value
-
-Inputs: No inputs required for default constructor. Board may be initialized with a 9x9 array or a input file.
-    The input file must be formatted in 9 rows of 9 integer values, with each value seperated by a space.
-Outputs: printData() prints the board array to stdout.
 */
+
 #include "../inc/mySudoku.h"
 #include <iostream>
 #include <fstream>
@@ -27,20 +24,22 @@ Outputs: printData() prints the board array to stdout.
 
 mySudoku::mySudoku(){
     /*
-    defualt constructor, calls initBoard() to initialize board attribute - initially sets all values to zero
-    Inputs: None
-    Output: None - directly modifies class board array
+    default constructor, calls init() to initialize class variables
     */
+
     init();
 }
 
 mySudoku::mySudoku(int inputBoard[][9]){
     /*
-    alternate constuctor - calls initBoard() to initialize board attribute
-     and populates the board with values from a 9x9 double pointer array
-    Inputs: A 9x9 integer array representing a sudoku board
-    Output: None - directly modifies class board array
+    Alternate constuctor - calls init() to initialize class variables and 
+        populates the board with values from a 9x9 2D array
+    Sets ready to true
+    
+    Parameters:
+        inputBoard (int[][]):   A 9x9 integer array representing a sudoku board
     */
+    
     init();
     for(int i(0); i<SIZE; i++){
         for(int j(0); j<SIZE; j++){
@@ -52,10 +51,9 @@ mySudoku::mySudoku(int inputBoard[][9]){
 
 void mySudoku::init(){
     /*
-    initializes class variables
-    Inputs: None
-    Output: None - directly modifies class board array
+    Initializes class variables - sets all elements of all three arrays to 0
     */
+
     for(int i=0; i<SIZE;i++){
         for(int j=0; j<SIZE; j++){
             board[i][j] = 0;            //init board array
@@ -67,20 +65,23 @@ void mySudoku::init(){
     }
     
 }
-void mySudoku::readData(const std::string fileName){
+void mySudoku::readData(const std::string filename){
     /*
-    takes in a file name and reads it, using the values to creates a sudoku board
-    Input:  A formatted file containing data defining a sudoku board
-    Output: None - directly modifies class board array
+    Reads a file to populate the board variable with a sudoku board
+    Sets ready to true
+
+    Parameters:
+        filename (const string):  name of file in directory to read
     */
+
     std::ifstream in_file;
-    in_file.open(fileName);
+    in_file.open(filename);
     if(in_file.fail()){
         std::cout << "Error opening the file" << std::endl;
         exit(1);
     }
     while(!in_file.eof()){
-        for(int i(0); i<SIZE; i++){
+        for(int i=0; i<SIZE; i++){
             for(int j(0); j<SIZE; j++){
                 in_file >> board[i][j];
             }
@@ -92,13 +93,16 @@ void mySudoku::readData(const std::string fileName){
 
 void mySudoku::printData(){
     /*
-    prints sudoku board
-    Input:  None
-    Output: prints the class board array to stdout - does not modify class variables
+    Prints sudoku board to stdout
+    If there are any zeroes (emtpy values) in the board, an X is printed
     */
-    for(int i(0); i<SIZE; i++){
-        for(int j(0); j<SIZE; j++){
-            std::cout << board[i][j] << " ";
+
+    for(int i=0; i<SIZE; i++){
+        for(int j=0; j<SIZE; j++){
+            if (board[i][j] == 0)
+                std::cout << "X" << " ";
+            else
+                std::cout << board[i][j] << " ";
         }
         std::cout << std::endl;
     }
@@ -106,125 +110,152 @@ void mySudoku::printData(){
 
 bool mySudoku::solvePuzzle(){
     /*
-    function to solve the sudoku puzzle:
-        first finds the possible values at every empty spot on the board
-        any spots with only one possibility are filled with that value - this is done for each spot after its possibilities are found, so the next spot takes this value into consideration
-        after going through every empty spot, the function calls solvePuzzleRec to completely solve puzzle
-    Input:  None
-    Output: function directly modifies class board array, and returns the return of solvePuzzleRec, which is 1 if the puzzle is solved, and 0 if not
+    Solves the sudoku puzzle:
+        First all possible values are found for every empty spot on the board
+        Any spots with only one possibility are filled with that value
+        After going through every spot once, the function calls solvePuzzleRec
+            to completely solve puzzle
+    If the "ready" value is false, there is no board, and the function returns false
+    
+    Return:
+        bool:   true if the puzzle has been solved, false if not
     */
-   if(!ready){
-       std::cout << "Board not loaded into object yet" << std::endl;
-       return false;
-   }
-    for(int i(0); i<SIZE; i++){
-        for(int j(0); j<SIZE; j++){
-            int index(0);           //index for posibilities arrays
-            if(board[i][j] == 0){   //check if spot is empty
 
-                for(int k(1); k<SIZE+1; k++){   //iterate through each possible number 1-9
-                    if(!checkRow(i, k) && !checkColumn(j, k) && !checkSubSquare(i,j,k)){    //check if each number is a possibility
-                        pos[i][j][index] = k;   //add possibilies to the pos array
-                        index++;                //update index for possibility array at this spot
-                        numPos[i][j]++;         //update number of possibilities for this spot
-
+    if(!ready){
+        std::cout << "Board not loaded into object yet" << std::endl;
+        return false;
+    }
+    for(int i=0; i<SIZE; i++){
+        for(int j=0; j<SIZE; j++){
+            int index = 0;                  // index for pos array
+            if(board[i][j] == 0){           // check if spot is empty
+                for(int k=1; k<SIZE+1; k++){// iterate through each possible number 1-9
+                    if (!checkRow(i, k) &&   //check if each number is a possibility
+                            !checkColumn(j, k) && 
+                            !checkSubSquare(i,j,k)) {     
+                        pos[i][j][index] = k;   // add possibilies to the pos array
+                        index++;                // update index for possibility array at this spot
+                        numPos[i][j]++;         // update number of possibilities for this spot
                     }
                 }
 
                 // enter unique solutions into board
                 if(numPos[i][j]==1){
-                    //if there is only one possibility at this spot, set it in the board
-                    //since this is the only possible number at this spot, it is entered into the board and
-                    //the next spot will take this number into consideration
                     board[i][j] = pos[i][j][0];
-                
                 }
             }
         }
     }
+    // Call solvePuzzleRec to complete puzzle
     return(solvePuzzleRec(0,0));
 }
 
 bool mySudoku::solvePuzzleRec(int startI, int startJ){
     /*
-    function to be called recursively in order to completely solve puzzle
-        at the point of this functions first call, all initially unique values are placed on the board, and every spot that was not unique has a list of possible values in the pos array
-        the rest of the puzzle is solved with branching - one option is chosen for the the first unsolved spot, and the puzzle will search for unique numbers in later spots.
-        If another spot has multiple possibilities, a number is chosen for that spot, and the solution continues.
-        If a certain number does not yield a solution, the program will go back to the most recent spot where a choice was made, and another option is chosen instead.
-        This is repeated until the correct number is chosen for each spot, yielding a solution
-        If the function reaches a point where there are no more possibilities for a spot and none have yeilded a solution, the function cannot solve the puzzle and 0 is returned
-        Input:  None
-        Output: function directly modifies the class board array, and returns 1 if the puzzle is solved, and 0 if not
-            at the last recursive call, 1 is returned if the end of the board has been reached, the rest of the functions calls on the stack then return 1
-            if 0 is returned during a recursive call, the current branch is not a solution, and the recursion backtracks until it reaches the last spot with another possibility
-            if no possibilities work, the functions on the stack return 0 until the initial call also returns 0.
+    Function to be called recursively in order to completely solve puzzle
+    At the point of this functions first call, all initially unique values are
+        placed on the board, and every spot that was not unique has a list of 
+        possible values in the pos array
+    The rest of the puzzle is solved with branching - one option is chosen for
+        the first unsolved spot, and the function will search for unique 
+        numbers in later spots using this temporary value
+    After branching, if another spot with multiple possibilities is encountered,
+        a number is again chosen for that spot, and another branch is started
+    If a certain branch does not yield a solution, the function will backtrack
+        to the most recent branching spot, and another option is chosen instead
+    This is repeated until a branch yields a solution for each spot
+    If the function reaches a point where there are no more possibilities for a
+        spot and no branches have yeilded a solution, the function cannot solve 
+        the puzzle and false is returned
+
+    Parameters:
+        startI (int):   row index to start search from ater branching
+        startJ (int):   column index to start search from
+    
+
+    Returns:
+        bool:   false if the current branch does not yeild a solution, true if it does
     */
 
-    bool found(0); //keeps track of whether or not a number that fits has been found for each spot
-    for(int i(startI); i<SIZE; i++){    //start on row of last branch
+    bool found = 0;       // if number that fits has been found for each spot
+    for(int i=startI; i<SIZE; i++) {    // start on row of the last branch
         int j;
-        if(i==startI){      //if this is the first iteration of the function call, start on column after the last branch spot
+        // if this is the first iteration, start on column after the last branch spot
+        if (i == startI)
             j=startJ;
-        }
-        else{
+        else
             j=0;
-        }
-        for(int j(0); j<SIZE; j++){    //start on column of last branch
-            //if this is the first iteration of the function call , start on column after the last branch spot
-            //otherwise, start at first column of new row (as usual)
-            if(i==startI && j==0){
+
+        for(int j=0; j<SIZE; j++) {    //start on column of last branch
+            // if this is the first iteration of the function call, start on column after the last branch spot
+            // otherwise, start at first column of new row (as usual)
+            if(i == startI && j == 0) {
                 j=startJ;
                 if(j>=SIZE){    //if this value of j is outside of range, go to next row
                     continue;
                 }
             }
-            if(board[i][j]==0){     //if the spot has a 0, it must have multiple possibilities
-                for(int k(0); k<numPos[i][j]; k++){ //iterate through possible numbers at this spot
-                    if(!checkRow(i, pos[i][j][k]) && !checkColumn(j, pos[i][j][k]) && !checkSubSquare(i, j, pos[i][j][k])){
+
+            if(board[i][j] == 0) {    //if the spot is empty
+                for(int k=0; k<numPos[i][j]; k++){ // iterate through possible numbers at this spot
+                    if(!checkRow(i, pos[i][j][k]) && 
+                            !checkColumn(j, pos[i][j][k]) && 
+                            !checkSubSquare(i, j, pos[i][j][k])) {
                         board[i][j] = pos[i][j][k];
-                        found = 1;      //indicate that a number had been found for this spot in this branch
-                        if(solvePuzzleRec(i, j+1)){  
-                            //if a number is found that works for this spot, recursively call function to go down this branch
-                            return(1);
+                        found = 1;                      // indicate that a number had been found for this spot in this branch
+                        if (solvePuzzleRec(i, j+1)) {  
+                            // if a number that fits in this spot is found, recursively call function to go down this branch
+                            return 1;
                         }
                     }
-                    found = 0;      //if spot has no more possibilities that fit in this branch
+                    found = 0;      // if spot has no more possibilities that fit in this branch
                 }
-                if(found==0){
+                if (found == 0) {
                     board[i][j] = 0;    //change this spot back to 0 before backtracking
-                    return(0);      //if no possibilities worked at this spot, return 0 to indicate this branch is not a solution
+                    return 0;      // f no possibilities worked at this spot, return 0 to indicate this branch is not a solution
                 }
             }
         }
     }
-    return(1);  //if end of board has been reached, all spots on the board have a valid number in it, and the functions can return
+    return(1);  // if end of board has been reached, all spots on the board have a valid number in it, and the functions can return
 }
 
 
 bool mySudoku::checkRow(const int row, const int number){
     /*
-    takes in a row number and value to search for
-    Input:  integer value for row on board to search, and integer value to search for
-    Output: returns 1 if the value is found, and 0 if not
+    Searches a row in the board for a value
+
+    Parameters:
+        row (const int):    row index to search
+        number (const int): number to search for
+
+    Return:
+        returns true if value is found, and false if not
     */
+
     for(int j=0; j<SIZE; j++){
-        if(number==board[row][j]){
-            return(1); //return true - number was found
+        if(number == board[row][j]){
+            return(1);      // return true - number was found
         }
     }
-    return(0);
+    return 0;
 }
 
 bool mySudoku::checkColumn(const int column, const int number){
     /*
-    takes in a column number and value to search for
-    Input: integer value for column on board to search, and integer value to search for
-    Output: returns 1 if the value is found, and 0 if not
+    Searches a column in the board for a value
+
+    Parameters:
+        column (const int): column index to search
+        number (const int): number to search for
+
+    Return:
+        returns true if value is found, and false if not
     */
-    for(int i(0); i<SIZE; i++){
-        if(number==board[i][column]){
-            return(1);  //return true if number is found
+
+    for(int i=0; i<SIZE; i++){
+        if(number == board[i][column]){
+            return(1);  // return true if number is found
         }
     }
     return(0);
@@ -232,20 +263,29 @@ bool mySudoku::checkColumn(const int column, const int number){
 
 bool mySudoku::checkSubSquare(int row, int column, const int number){
     /*
-    takes in a row, column, and number to search the subsquare containing the row and column for
-        operates by finding the row and column of the top left corner of the subsquare, and searches the values of the subsquare using that corner as reference.
-    Input: integer values for row and column on board to search subsquare of, and integer value to search for
-    Output: returns 1 if the value is found, and 0 if not
+    Searches a subsquare in the board for a value
+    Searches the subsquare containing the spot at the given row / column:
+        First, finds the row and column index of the top left corner of this subsquare
+        It then uses this corner as a reference to search the rest of the subquare
+
+    Parameters:
+        row (int):    row index to search
+        column (int): column index to search
+        number (const int): number to search for
+
+    Return:
+        returns true if value is found, and false if not
     */
-    if(row%3 != 0){ //given row is not the beginning of a subsquare (0, 3, or 6)
+
+    if(row%3 != 0){     // given row is not the beginning of a subsquare (0, 3, or 6)
         if(row > 6)
-            row = 6;
+            row = 6;  
         else if(row > 3)
             row = 3;
         else
             row = 0;    
     }
-    if(column%3 != 0){ //given column is not the beginning of a subsquare (0, 3, or 6)
+    if(column%3 != 0){ // given column is not the beginning of a subsquare (0, 3, or 6)
         if(column > 6)
             column = 6;
         else if(column > 3)
@@ -253,14 +293,14 @@ bool mySudoku::checkSubSquare(int row, int column, const int number){
         else
             column = 0;    
     }
-    //now can check for number
-    for(int i=row; i<row+3;i++){
+    // now can check subsquare for number
+    for(int i=row; i<row+3; i++){
         for(int j=column; j<column+3; j++){
-            if(board[i][j]==number)
-                return(1);
+            if(board[i][j] == number)
+                return 1;
         }
     }
-    return(0);
+    return 0;
 }
 
 mySudoku::~mySudoku(){
